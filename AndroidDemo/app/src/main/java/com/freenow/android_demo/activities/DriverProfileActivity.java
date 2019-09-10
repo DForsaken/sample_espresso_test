@@ -63,7 +63,9 @@ public class DriverProfileActivity extends AppCompatActivity {
         FloatingActionButton fab = findViewById(R.id.fab);
 
         textViewName.setText(driver.getName());
-        GlideApp.with(this).load(driver.getAvatar()).placeholder(R.drawable.ic_driver).apply(RequestOptions.circleCropTransform()).into(imageViewAvatar);
+        GlideApp.with(this).load(
+                driver.getAvatar()).placeholder(R.drawable.ic_driver).apply(
+                        RequestOptions.circleCropTransform()).into(imageViewAvatar);
         textViewLocation.setText(driver.getLocation());
         textViewDate.setText(new SimpleDateFormat("yyyy-MM-dd").format(driver.getRegisteredDate()));
         fab.setOnClickListener(new View.OnClickListener() {

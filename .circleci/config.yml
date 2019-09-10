@@ -1,45 +1,36 @@
 version: 2
 jobs:
   build:
-    working_directory: ~/code
     docker:
     - image: circleci/android:api-28
+
+    working_directory: ~/repo
+
     environment:
-    - JVM_OPTS: -Xmx4G
+      JVM_OPTS: -Xmx3200m
+      TERM: dumb
+
     steps:
-    - checkout
-    - restore_cache:
-        key: jars-{{ checksum "AndroidDemo/build.gradle" }}-{{ checksum  "AndroidDemo/app/build.gradle" }}
-    - run:
-        name: chmod permissions
-        command: cd AndroidDemo;chmod +x ./gradlew
-    - run:
-        name: Download Dependencies
-        command: cd AndroidDemo;./gradlew androidDependencies
-    - save_cache:
-        paths:
-        - ~/.gradle
-        key: jars-{{ checksum "AndroidDemo/build.gradle" }}-{{ checksum  "AndroidDemo/app/build.gradle" }}
-    - run:
-        name: Setup emulator
-        command: sdkmanager "system-images;android-22;default;armeabi-v7a" && echo "no" | avdmanager create avd -n test -k "system-images;android-22;default;armeabi-v7a"
-    - run:
-        name: Launch emulator
-        command: export LD_LIBRARY_PATH=${ANDROID_HOME}/emulator/lib64:${ANDROID_HOME}/emulator/lib64/qt/lib && ${ANDROID_HOME}/emulator/emulator64-x86 -avd test -noaudio -no-boot-anim -no-window -accel auto -verbose
-        background: true
-    - run:
-        name: Wait emulator
-        command: |
-          # wait for it to have booted
-          circle-android wait-for-boot
-          # unlock the emulator screen
-          sleep 30
-          adb shell input keyevent 82
-    - run:
-        name: Run EspressoTests
-        command: ./gradlew connectedAndroidTest -PdisablePreDex
-    - store_artifacts:
-        path: app/build/reports
-        destination: reports
-    - store_test_results:
-        path: app/build/reports/androidTests/connected/
+      - checkout
+
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "AndroidDemo/build.gradle" }}
+          - v1-dependencies-
+
+      - run: cd AndroidDemo;./gradlew dependencies
+
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: v1-dependencies-{{ checksum "AndroidDemo/build.gradle" }}
+
+
+      - run: cd AndroidDemo;./gradlew assembleDebug
+      - run: cd AndroidDemo;./gradlew assembleAndroidTest
+
+      - run: echo $GCLOUD_SERVICE_KEY | base64 --decode > ${HOME}/client-secret.json
+      - run: sudo gcloud config set project test-7d4cd
+      - run: sudo gcloud auth activate-service-account firebase-adminsdk-ozzdp@test-7d4cd.iam.gserviceaccount.com --key-file ${HOME}/client-secret.json
+      - run: sudo gcloud config set account firebase-adminsdk-ozzdp@test-7d4cd.iam.gserviceaccount.com
+      - run: sudo gcloud firebase test android run --type instrumentation --app AndroidDemo/app/build/outputs/apk/debug/app-debug.apk --test AndroidDemo/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk --device model=Nexus9,version=25 --use-orchestrator

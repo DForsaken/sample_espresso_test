@@ -203,7 +203,8 @@ public class MainActivity extends AuthenticatedActivity
                     public void onComplete(@NonNull Task task) {
                         mMap.clear();
                         if (task.isSuccessful() && ((mLastKnownLocation = (Location) task.getResult()) != null)) {
-                            LatLng lastKnownLatLng = new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude());
+                            LatLng lastKnownLatLng =
+                                    new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude());
                             mMap.addMarker(new MarkerOptions().position(lastKnownLatLng).draggable(true).icon(mIconMarker));
                             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(lastKnownLatLng, DEFAULT_ZOOM));
                         } else {

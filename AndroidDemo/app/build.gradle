@@ -20,7 +20,6 @@ android {
     testOptions {
         unitTests.all {
             testLogging {
-                outputs.upToDateWhen {false}
                 events "passed", "failed", "standardError"
                 showCauses true
                 showExceptions true

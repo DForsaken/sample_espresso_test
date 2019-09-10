@@ -1,6 +1,7 @@
 package com.freenow.android_demo.activities;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -24,6 +25,12 @@ public class DriverProfileActivity extends AppCompatActivity {
 
     public static Intent createIntent(Activity activity, Driver driver) {
         Intent intent = new Intent(activity, DriverProfileActivity.class);
+        intent.putExtra(EXTRA_DRIVER, driver);
+        return intent;
+    }
+
+    public static Intent createContextIntent(Context context, Driver driver) {
+        Intent intent = new Intent(context, DriverProfileActivity.class);
         intent.putExtra(EXTRA_DRIVER, driver);
         return intent;
     }
